@@ -27,6 +27,15 @@
         path: /var/www/html/index.html
         state: absent
 
+    - name: Add Default Web Site
+      tags: defaultweb, apache, apache2
+      ansible.builtin.copy:
+        src: default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: "0644"
+
 - name: Setup DB Servers
   hosts: db_servers
   become: true
