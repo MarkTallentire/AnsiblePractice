@@ -10,6 +10,31 @@
         update_cache: true
       when: ansible_distribution == "Ubuntu"
 
+- name: Setup workstations
+  hosts: workstations
+  become: true
+  tasks:
+    - name: Install unzip
+      ansible.builtin.package:
+        name: unzip
+
+    - name: Ensure user bin path exists
+      ansible.builtin.file:
+        path: /user/local/bin
+        state: directory
+        mode: "0600"
+        owner: root
+        group: root
+
+    - name: Install terraform
+      ansible.builtin.unarchive:
+        src: https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
+        dest: /user/local/bin
+        remote_src: true
+        mode: "0755"
+        owner: root
+        group: root
+
 - name: Setup Web Servers
   hosts: web_servers
   become: true
