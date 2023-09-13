@@ -1,0 +1,7 @@
+[web_servers]
+pi
+
+[db_servers]
+pi
+
+[file_servers]

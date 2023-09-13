@@ -1,0 +1,48 @@
+---
+- name: "Update all"
+  hosts: all
+  become: true
+  pre_tasks:
+    - name: Install updates
+      tags: always
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: true
+      when: ansible_distribution == "Ubuntu"
+
+- name: Setup Web Servers
+  hosts: web_servers
+  become: true
+  tasks:
+    - name: Install apache and php
+      tags: apache, apache2, ubuntu
+      ansible.builtin.package:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: present
+
+    - name: Ensure empty wwwroot
+      ansible.builtin.file:
+        path: /var/www/html/index.html
+        state: absent
+
+- name: Setup DB Servers
+  hosts: db_servers
+  become: true
+  tasks:
+    - name: Install MariaDB
+      tags: mariadb, db, ubuntu
+      ansible.builtin.apt:
+        name: mariadb-server
+        state: present
+
+- name: Setup File Servers
+  hosts: file_servers
+  become: true
+  tasks:
+    - name: Install Samba
+      tags: samba, file, ubuntu
+      ansible.builtin.package:
+        name: Samba
+        state: present
