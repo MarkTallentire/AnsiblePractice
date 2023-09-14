@@ -73,7 +73,7 @@
         path: /etc/apache2/apache2.conf
         regexp: "^LogLevel"
         line: LogLevel debug
-        register: apache
+      register: apache
 
     - name: Restart apache2
       tags: apache
