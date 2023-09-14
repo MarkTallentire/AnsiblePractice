@@ -1,122 +1,42 @@
-- name: "Update all"
-  hosts: all
+---
+- hosts: all
   become: true
   pre_tasks:
-    - name: Update repo cache
+    - name: update repository index (CentOS)
       tags: always
-      ansible.builtin.apt:
-        update_cache: true
+      dnf:
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == "CentOS"
+
+    - name: update repository index (Ubuntu)
+      tags: always
+      apt:
+        update_cache: yes
       changed_when: false
       when: ansible_distribution == "Ubuntu"
 
-- name: Users and roles
-  hosts: all
+- hosts: all
   become: true
-  tasks:
-    - name: Add SSH Key for Simone
-      tags: always
-      ansible.posix.authorized_key:
-        user: simone
-        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtfGmaCD5IRmnWTTkUwne9J6RDGhHkoJ8XLHz+5gVKH+ZZ6PLghgAwT+KS0qUijOv4IrZP6guTUaZTV3ejUfWdLXgQxW0suDFvMd5DZR7XAXDKoKvJF5WprYFXzR46Jrn/k8JC8DpAAJvnAEnyes/wYy6Yow7236gQrbamdic/iGsGQN1zJ2CVCdXN+BDzfkfyX6Y6iOduioO0UsuRPumDoEsltAQRSzLeChzb26IhBtx94UAs5ezkQycGasPf0IcfUhb91Iq/3dGwnEGRdvl+g3Kvik1sWRBaQNSAir9iIUQyoSQuuWIPO2KJ9q3YmhV6F5QP3amwAPs3TjNl9yeMmbxivpRbtZfo0bnI3iJyx+/Ayc7Ldb0JNaHKZipXPwMvXSVCsq6yZX96khrasPgvHTVlPrZbYsGbCuheLk7lyRQvtYkhhSkjWtlL2MLHGJPFTBM6EA4h7WsxS5w4ZZ6909Zckk6i/XpJrLXOStxTWGbxyXZn/y4/50SA66pCKy0= marktallentire@DESKTOP-8G7K6PM"
+  roles:
+    - base
 
-- name: Setup workstations
-  hosts: workstations
+- hosts: workstations
   become: true
-  tasks:
-    - name: Install unzip
-      ansible.builtin.package:
-        name: unzip
+  roles:
+    - workstations
 
-    - name: Ensure user bin path exists
-      ansible.builtin.file:
-        path: /user/local/bin
-        state: directory
-        mode: "0600"
-        owner: root
-        group: root
-
-    - name: Install terraform
-      ansible.builtin.unarchive:
-        src: https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
-        dest: /user/local/bin
-        remote_src: true
-        mode: "0755"
-        owner: root
-        group: root
-
-- name: Setup Web Servers
-  hosts: web_servers
+- hosts: web_servers
   become: true
-  tasks:
-    - name: Install apache and php
-      tags: apache, apache2, ubuntu
-      ansible.builtin.package:
-        name:
-          - apache2
-          - libapache2-mod-php
-        state: present
+  roles:
+    - web_servers
 
-    - name: Ensure nginx is not installed
-      tags: nginx
-      ansible.builtin.package:
-        name: nginx
-        state: absent
-        autoremove: true
-
-    ## This bit is not required for Ubuntu but is required for some linux distros
-    - name: Start apache service
-      tags: apache, apache2
-      ansible.builtin.service:
-        name: apache2
-        state: started
-        enabled: true
-
-    - name: Ensure empty wwwroot
-      ansible.builtin.file:
-        path: /var/www/html/index.html
-        state: absent
-
-    # Random line change to apache to show how to restart services
-    - name: Change email address for admin
-      tags: apache
-      ansible.builtin.lineinfile:
-        path: /etc/apache2/apache2.conf
-        regexp: "^LogLevel"
-        line: LogLevel debug
-      register: apache
-
-    - name: Restart apache2
-      tags: apache
-      ansible.builtin.service:
-        name: apache2
-        state: restarted
-      when: apache.changed
-
-    - name: Add Default Web Site
-      tags: defaultweb, apache, apache2
-      ansible.builtin.copy:
-        src: default_site.html
-        dest: /var/www/html/index.html
-        owner: root
-        group: root
-        mode: "0644"
-
-- name: Setup DB Servers
-  hosts: db_servers
+- hosts: db_servers
   become: true
-  tasks:
-    - name: Install MariaDB
-      tags: mariadb, db, ubuntu
-      ansible.builtin.apt:
-        name: mariadb-server
-        state: present
+  roles:
+    - db_servers
 
-- name: Setup File Servers
-  hosts: file_servers
+- hosts: file_servers
   become: true
-  tasks:
-    - name: Install Samba
-      tags: samba, file, ubuntu
-      ansible.builtin.package:
-        name: Samba
-        state: present
+  roles:
+    - file_servers
