@@ -53,10 +53,6 @@
         state: absent
         autoremove: true
 
-    - name: Reboot to clear out nginx
-      tags: nginx, Reboot
-      ansible.builtin.reboot:
-
     ## This bit is not required for Ubuntu but is required for some linux distros
     - name: Start apache service
       tags: apache, apache2
@@ -69,6 +65,22 @@
       ansible.builtin.file:
         path: /var/www/html/index.html
         state: absent
+
+    # Random line change to apache to show how to restart services
+    - name: Change email address for admin
+      tags: apache
+      ansible.builtin.lineinfile:
+        path: /etc/apache2/apache2.conf
+        regexp: "^LogLevel"
+        line: LogLevel debug
+        register: apache
+
+    - name: Restart apache2
+      tags: apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+      when: apache.changed
 
     - name: Add Default Web Site
       tags: defaultweb, apache, apache2
