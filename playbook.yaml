@@ -51,7 +51,7 @@
       ansible.builtin.package:
         name: nginx
         state: absent
-        auto_remove: true
+        autoremove: true
 
     - name: Reboot to clear out nginx
       tags: nginx, Reboot
