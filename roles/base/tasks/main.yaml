@@ -3,3 +3,13 @@
   ansible.posix.authorized_key:
     user: simone
     key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCtfGmaCD5IRmnWTTkUwne9J6RDGhHkoJ8XLHz+5gVKH+ZZ6PLghgAwT+KS0qUijOv4IrZP6guTUaZTV3ejUfWdLXgQxW0suDFvMd5DZR7XAXDKoKvJF5WprYFXzR46Jrn/k8JC8DpAAJvnAEnyes/wYy6Yow7236gQrbamdic/iGsGQN1zJ2CVCdXN+BDzfkfyX6Y6iOduioO0UsuRPumDoEsltAQRSzLeChzb26IhBtx94UAs5ezkQycGasPf0IcfUhb91Iq/3dGwnEGRdvl+g3Kvik1sWRBaQNSAir9iIUQyoSQuuWIPO2KJ9q3YmhV6F5QP3amwAPs3TjNl9yeMmbxivpRbtZfo0bnI3iJyx+/Ayc7Ldb0JNaHKZipXPwMvXSVCsq6yZX96khrasPgvHTVlPrZbYsGbCuheLk7lyRQvtYkhhSkjWtlL2MLHGJPFTBM6EA4h7WsxS5w4ZZ6909Zckk6i/XpJrLXOStxTWGbxyXZn/y4/50SA66pCKy0= marktallentire@DESKTOP-8G7K6PM"
+
+- name: Add modified SSH ssh_template_file
+  tags: always
+  template: 
+    src: "{{ ssh_template_file }}"
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart_sshd
